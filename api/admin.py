@@ -5,4 +5,7 @@ from .models import *
 
 admin.site.register(Patient)
 admin.site.register(Prescription)
-admin.site.register(RecentVisit)
+admin.site.register(Disease)
+admin.site.register(Allergy)
+admin.site.register(Appointment)
+admin.site.register(Visit)

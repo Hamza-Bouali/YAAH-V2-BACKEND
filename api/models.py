@@ -1,64 +1,129 @@
 import uuid
 from django.db import models
+from django.core.exceptions import ValidationError
+from datetime import date
 
+class Patient(models.Model):
+    """Model representing a patient in the medical system."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    age = models.PositiveIntegerField()
+    email = models.EmailField(unique=True, blank=True, null=True)
+    phone = models.CharField(max_length=20)
+    address = models.TextField(null=True, blank=True)
+    dob = models.DateField()
+    blood_type = models.CharField(max_length=3, null=True, blank=True)  # e.g., A+, B-, O+
+    treatment = models.TextField(blank=True)
+    allergies = models.ManyToManyField('Allergy', related_name='patient', blank=True)
+    disease= models.ManyToManyField('Disease', related_name='patient', blank=True)
+    visit = models.ManyToManyField('Visit', related_name='patient', blank=True)
+    appointment = models.ManyToManyField('Appointment', related_name='patient', blank=True)
 
+    def calculate_age(self):
+        today = date.today()
+        return today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
 
+    def save(self, *args, **kwargs):
+        self.age = self.calculate_age()
+        super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+
+class Disease(models.Model):
+    """Model representing a disease."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+
+class Allergy(models.Model):
+    """Model representing an allergy."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "Allergies"
+        ordering = ['name']
 
 class Prescription(models.Model):
+    """Model representing a medical prescription."""
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     medication = models.CharField(max_length=255)
     dosage = models.CharField(max_length=255)
     frequency = models.CharField(max_length=255)
     start_date = models.DateField()
     end_date = models.DateField()
-    status = models.CharField(max_length=50)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='active')
     duration = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        if self.end_date < self.start_date:
+            raise ValidationError("End date cannot be before start date")
 
     def __str__(self):
-        return f"{self.medication} ({self.status})"
+        return f"{self.medication} ({self.status}) - {self.patient.name}"
 
+    class Meta:
+        ordering = ['-created_at']
 
-class RecentVisit(models.Model):
+class Visit(models.Model):
+    """Model representing a patient visit."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date = models.DateField()
     reason = models.TextField()
-    doctor = models.CharField(max_length=255)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Visit on {self.date} by {self.doctor}"
+        return f"Visit on {self.date}  - {self.patient.name}"
 
+    class Meta:
+        ordering = ['-date']
 
-class Patient(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # Automatically generate UUID
-    name = models.CharField(max_length=255)
-    age = models.PositiveIntegerField()
-    email = models.EmailField(unique=True)
-    treatment = models.TextField()
-    diseases = models.JSONField()  # Stores a list of strings
-    phone = models.CharField(max_length=20)
-    address = models.TextField()
-    last_visit = models.DateField()
-    dob = models.DateField()
-    blood_type = models.CharField(max_length=3)  # e.g., A+, B-, O+
-    next_appointment = models.DateField(null=True, blank=True)
-    medications = models.JSONField()  # Stores a list of medication names
-    allergies = models.JSONField()  # Stores a list of allergy names
-    prescriptions = models.ManyToManyField(Prescription, related_name="patients")
-    recent_visits = models.ManyToManyField(RecentVisit, related_name="patients")
-    next_visit=models.ForeignKey(to='Appointement',on_delete=models.CASCADE,null=True,blank=True,related_name='next_visit_for') 
-    
+class Appointment(models.Model):
+    """Model representing a scheduled appointment."""
+    STATUS_CHOICES = [
+        ('scheduled', 'Scheduled'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+        ('no_show', 'No Show'),
+    ]
 
-    def get_last_visit(self):
-        return self.recent_visits.order_by('-date').first()
-
-    def __str__(self):
-        return self.name
-
-
-class Appointement(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date = models.DateField()
     time = models.TimeField()
-    patient=models.ForeignKey(Patient,on_delete=models.CASCADE, related_name='appointments')
-    status = models.CharField(max_length=50)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='scheduled')
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        if self.date < date.today():
+            raise ValidationError("Appointment date cannot be in the past")
 
     def __str__(self):
-        return f"Appointement on {self.date} by {self.doctor}"
+        return f"Appointment on {self.date} at {self.time} - {self.patient.name}"
+
+    class Meta:
+        ordering = ['date', 'time']
