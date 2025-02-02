@@ -18,6 +18,7 @@ class Patient(models.Model):
     disease= models.ManyToManyField('Disease', related_name='patient', blank=True)
     visit = models.ManyToManyField('Visit', related_name='patient', blank=True)
     appointment = models.ManyToManyField('Appointment', related_name='patient', blank=True)
+    medication = models.ManyToManyField('Prescription', related_name='patient', blank=True)
 
     def calculate_age(self):
         today = date.today()
@@ -96,10 +97,11 @@ class Visit(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Visit on {self.date}  - {self.patient.name}"
+        return f"Visit on {self.date}  - {self.reason}"
 
     class Meta:
         ordering = ['-date']
+        
 
 class Appointment(models.Model):
     """Model representing a scheduled appointment."""
@@ -127,3 +129,11 @@ class Appointment(models.Model):
 
     class Meta:
         ordering = ['date', 'time']
+
+
+
+from django.contrib.auth.models import AbstractUser
+class Doctor(AbstractUser):
+    
+    def __str__(self):
+        return self.username + " "+ self.email

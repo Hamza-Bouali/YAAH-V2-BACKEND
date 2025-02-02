@@ -84,7 +84,7 @@ class Command(BaseCommand):
                 address=fake.address(),
                 dob=dob,
                 blood_type=random.choice(blood_types),
-                treatment=fake.text(max_nb_chars=200)
+                treatment=fake.text(max_nb_chars=200),
             )
             patients.append(patient)
         return patients
@@ -94,7 +94,6 @@ class Command(BaseCommand):
             # Assign diseases and allergies
             patient.disease.add(*random.sample(diseases, random.randint(0, min(2, len(diseases)))))
             patient.allergies.add(*random.sample(allergies, random.randint(0, min(2, len(allergies)))))
-
             # Create visits
             for _ in range(random.randint(1, 5)):
                 visit = Visit.objects.create(
@@ -102,6 +101,23 @@ class Command(BaseCommand):
                     reason=random.choice(['Check-up', 'Follow-up', 'Emergency'])
                 )
                 patient.visit.add(visit)
+
+
+            # Create prescriptions with correct fields
+            for _ in range(random.randint(1, 3)):
+                start_date = fake.date_between(start_date='-1y', end_date='today')
+                end_date = start_date + timedelta(days=random.randint(30, 180))
+                prescription = Prescription.objects.create(
+                    medication=fake.word(),
+                    dosage=f"{random.randint(10, 500)}mg",
+                    frequency=random.choice(['Daily', 'Twice daily', 'As needed']),
+                    start_date=start_date,
+                    end_date=end_date,
+                    status=random.choice(['active', 'completed', 'cancelled']),
+                    duration=f"{random.randint(1, 6)} months"
+                )
+                patient.medication.add(prescription)
+
 
             # Create appointments
             for _ in range(random.randint(0, 2)):
