@@ -18,7 +18,7 @@ class Command(BaseCommand):
             type=int,
             default=50,
             help='Number of patients to create'
-        )
+        )   
         parser.add_argument(
             '--clear',
             action='store_true',
@@ -64,13 +64,13 @@ class Command(BaseCommand):
 
     def create_allergies(self):
         allergies_data = [
-                        ("Penicillin", "Allergic reaction to penicillin antibiotics"),
-                        ("Peanuts", "Severe peanut allergy"),
-                        ("Latex", "Reaction to latex materials"),
-                        ("Dairy", "Lactose intolerance and dairy allergy"),
-                        ("Shellfish", "Allergic reaction to shellfish"),
-                        ("Pollen", "Seasonal pollen allergy"),
-                    ]
+            ("Penicillin", "Allergic reaction to penicillin antibiotics"),
+            ("Peanuts", "Severe peanut allergy"),
+            ("Latex", "Reaction to latex materials"),
+            ("Dairy", "Lactose intolerance and dairy allergy"),
+            ("Shellfish", "Allergic reaction to shellfish"),
+            ("Pollen", "Seasonal pollen allergy"),
+        ]
         return [Allergy.objects.create(name=name, description=desc) for name, desc in allergies_data]
 
     def create_patients(self, num_patients):
@@ -94,9 +94,8 @@ class Command(BaseCommand):
     def create_patient_data(self, patients, diseases, allergies):
         for patient in patients:
             # Assign diseases and allergies
-            patient.disease.add(*random.sample(diseases, random.randint(0,  len(diseases))))
-            patient.allergies.add(*random.sample(allergies, random.randint(0,  len(allergies))))
-            
+            #patient.disease.add(*random.sample(diseases, random.randint(0, len(diseases))))
+            #patient.allergies.set([allergy.id for allergy in random.sample(allergies, random.randint(0, len(allergies)))])
             # Create visits
             for _ in range(random.randint(1, 5)):
                 visit = Visit.objects.create(
@@ -105,6 +104,23 @@ class Command(BaseCommand):
                     reason=random.choice(['Check-up', 'Follow-up', 'Emergency'])
                 )
                 patient.visit.add(visit)
+
+            #create diseases 
+            for _ in range(random.randint(1, 3)):
+                disease=Disease.objects.create(
+                    name=fake.word()[:20],
+                    description=fake.text(max_nb_chars=200)
+                )
+                patient.disease.add(disease)
+
+            # Create allergies
+            for _ in range(random.randint(1, 3)):
+                allergy=Allergy.objects.create(
+                    name=fake.word()[:20],
+                    description=fake.text(max_nb_chars=200)
+                )
+                patient.allergies.add(allergy)
+
 
 
             # Create prescriptions with correct fields

@@ -3,36 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from datetime import date
 
-class Patient(models.Model):
-    """Model representing a patient in the medical system."""
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255)
-    age = models.PositiveIntegerField(null=False, blank=False, default=10, editable=False)
-    email = models.EmailField(unique=True, blank=True, null=True)
-    phone = models.CharField(max_length=20)
-    address = models.TextField(null=True, blank=True)
-    dob = models.DateField()
-    blood_type = models.CharField(max_length=3, null=True, blank=True)  # e.g., A+, B-, O+
-    treatment = models.TextField(blank=True)
-    allergies = models.ManyToManyField('Allergy', related_name='patient', blank=True)
-    disease= models.ManyToManyField('Disease', related_name='patient', blank=True)
-    visit = models.ManyToManyField('Visit', related_name='patient', blank=True)
-    appointment = models.ManyToManyField('Appointment', related_name='patient', blank=True)
-    medication = models.ManyToManyField('Prescription', related_name='patient', blank=True)
 
-    def calculate_age(self):
-        today = date.today()
-        return today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
-
-    def save(self, *args, **kwargs):
-        self.age = self.calculate_age()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        ordering = ['name']
 
 class Disease(models.Model):
     """Model representing a disease."""
@@ -68,13 +39,13 @@ class Prescription(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    medication = models.CharField(max_length=255)
-    dosage = models.CharField(max_length=255)
-    frequency = models.CharField(max_length=255)
-    start_date = models.DateField()
-    end_date = models.DateField()
+    medication = models.CharField(max_length=255, help_text="Name of the medication", blank=True)
+    dosage = models.CharField(max_length=255,blank=True)
+    frequency = models.CharField(max_length=255, blank=True)
+    start_date = models.DateField(default=date.today)
+    end_date = models.DateField(default=date.fromisocalendar(2022, 1, 1))
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='active')
-    duration = models.CharField(max_length=100)
+    duration = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -138,3 +109,36 @@ class Doctor(AbstractUser):
     
     def __str__(self):
         return self.username + " "+ self.email
+    
+
+
+class Patient(models.Model):
+    """Model representing a patient in the medical system."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    age = models.PositiveIntegerField(null=False, blank=False, default=10, editable=False)
+    email = models.EmailField(unique=True, blank=True, null=True)
+    phone = models.CharField(max_length=20)
+    address = models.TextField(null=True, blank=True)
+    dob = models.DateField()
+    blood_type = models.CharField(max_length=3, null=True, blank=True)  # e.g., A+, B-, O+
+    treatment = models.TextField(blank=True)
+    allergies = models.ManyToManyField(Allergy, blank=True, related_name='patient')
+    disease= models.ManyToManyField(Disease, related_name='patient', blank=True)
+    visit = models.ManyToManyField(Visit, related_name='patient', blank=True)
+    appointment = models.ManyToManyField(Appointment, related_name='patient', blank=True)
+    medication = models.ManyToManyField(Prescription, related_name='patient', blank=True)
+
+    def calculate_age(self):
+        today = date.today()
+        return today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
+
+    def save(self, *args, **kwargs):
+        self.age = self.calculate_age()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
