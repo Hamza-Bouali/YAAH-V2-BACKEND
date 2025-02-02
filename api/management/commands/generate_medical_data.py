@@ -97,6 +97,7 @@ class Command(BaseCommand):
             # Create visits
             for _ in range(random.randint(1, 5)):
                 visit = Visit.objects.create(
+                    hour=fake.time(),
                     date=fake.date_between(start_date='-1y', end_date='today'),
                     reason=random.choice(['Check-up', 'Follow-up', 'Emergency'])
                 )

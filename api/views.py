@@ -11,6 +11,8 @@ from .serializers import UserRegistrationSerializer, UserLoginSerializer
 # Create your views here.
 
 import logging
+from django.db.models.functions import TruncDate
+from django.db.models import Count
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +57,8 @@ class VisitViewSet(viewsets.ModelViewSet):
     serializer_class = VisitSerializer
 
 class AppointmentViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]  # Override default permissions
+
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
 
@@ -62,3 +66,35 @@ def index(request):
     return HttpResponse('Hello World')
 
 
+
+
+"""class AppointmentStatisticsView(APIView):
+    permission_classes = [AllowAny]  # Override default permissions
+    def get(self, request):
+        appointments = Appointment.objects.all()
+        total_appointments = appointments.count()
+        completed_appointments = appointments.filter(status='completed').count()
+        cancelled_appointments = appointments.filter(status='cancelled').count()
+        active_appointments = appointments.filter(status='active').count()
+        appointments_by_day = appointments.annotate(day=TruncDate('date')).values('day').order_by('day')
+        return Response({
+            'total_appointments': total_appointments,
+            'completed_appointments': completed_appointments,
+            'cancelled_appointments': cancelled_appointments,
+            'active_appointments': active_appointments,
+            'appointments_by_day': appointments_by_day,
+        })"""
+
+
+from time import time
+from datetime import date, timedelta
+class VisitStatisticsView(APIView):
+    def get(self, request):
+        # Example query, adjust as needed
+        visits = Visit.objects.all()
+        visit_stats = Visit.objects.values('date').annotate(count=Count('id'))
+        lastweekday=date.today()-timedelta(days=7)
+        last_week_visits = Visit.objects.filter(date__gte=lastweekday.strftime('%Y-%m-%d'), date__lte=date.today().strftime('%Y-%m-%d'))
+        last_week_visits_count = last_week_visits.count()
+        last_week_visits_by_day = last_week_visits.annotate(day=TruncDate('date')).values('day').order_by('day')    
+        return Response({"visits": visits.count(), "visits_per_day": visit_stats, "last_week_visits": last_week_visits_count, "last_week_visits_by_day": last_week_visits_by_day})

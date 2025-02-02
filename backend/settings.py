@@ -80,7 +80,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # Use JWT for authentication
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # Require authentication for all views
+        'rest_framework.permissions.AllowAny',  # Allow unauthenticated access to all views
     ],
 }
 
@@ -139,6 +139,8 @@ USE_I18N = True
 USE_TZ = True
 
 AUTH_USER_MODEL = 'api.Doctor'
+
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/

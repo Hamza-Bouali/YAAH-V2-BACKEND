@@ -7,7 +7,7 @@ class Patient(models.Model):
     """Model representing a patient in the medical system."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
-    age = models.PositiveIntegerField()
+    age = models.PositiveIntegerField(null=False, blank=False, default=10, editable=False)
     email = models.EmailField(unique=True, blank=True, null=True)
     phone = models.CharField(max_length=20)
     address = models.TextField(null=True, blank=True)
@@ -92,6 +92,7 @@ class Visit(models.Model):
     """Model representing a patient visit."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date = models.DateField()
+    hour = models.TimeField()
     reason = models.TextField()
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
