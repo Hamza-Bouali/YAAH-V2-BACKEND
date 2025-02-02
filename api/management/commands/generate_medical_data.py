@@ -64,11 +64,13 @@ class Command(BaseCommand):
 
     def create_allergies(self):
         allergies_data = [
-            ("Penicillin", "Antibiotic allergy"),
-            ("Peanuts", "Food allergy"),
-            ("Latex", "Material allergy"),
-            ("Dust", "Environmental allergy"),
-        ]
+                        ("Penicillin", "Allergic reaction to penicillin antibiotics"),
+                        ("Peanuts", "Severe peanut allergy"),
+                        ("Latex", "Reaction to latex materials"),
+                        ("Dairy", "Lactose intolerance and dairy allergy"),
+                        ("Shellfish", "Allergic reaction to shellfish"),
+                        ("Pollen", "Seasonal pollen allergy"),
+                    ]
         return [Allergy.objects.create(name=name, description=desc) for name, desc in allergies_data]
 
     def create_patients(self, num_patients):
@@ -78,10 +80,10 @@ class Command(BaseCommand):
         for _ in range(num_patients):
             dob = fake.date_of_birth(minimum_age=18, maximum_age=90)
             patient = Patient.objects.create(
-                name=fake.name(),
-                email=fake.unique.email(),
-                phone=fake.phone_number(),
-                address=fake.address(),
+                name=fake.name()[:20],  # Ensure the name does not exceed 20 characters
+                email=fake.unique.email()[:50],  # Ensure the email does not exceed 50 characters
+                phone=fake.phone_number()[:15],  # Ensure the phone number does not exceed 15 characters
+                address=fake.address()[:100],  # Ensure the address does not exceed 100 characters
                 dob=dob,
                 blood_type=random.choice(blood_types),
                 treatment=fake.text(max_nb_chars=200),
@@ -92,8 +94,9 @@ class Command(BaseCommand):
     def create_patient_data(self, patients, diseases, allergies):
         for patient in patients:
             # Assign diseases and allergies
-            patient.disease.add(*random.sample(diseases, random.randint(0, min(2, len(diseases)))))
-            patient.allergies.add(*random.sample(allergies, random.randint(0, min(2, len(allergies)))))
+            patient.disease.add(*random.sample(diseases, random.randint(0,  len(diseases))))
+            patient.allergies.add(*random.sample(allergies, random.randint(0,  len(allergies))))
+            
             # Create visits
             for _ in range(random.randint(1, 5)):
                 visit = Visit.objects.create(
@@ -109,9 +112,9 @@ class Command(BaseCommand):
                 start_date = fake.date_between(start_date='-1y', end_date='today')
                 end_date = start_date + timedelta(days=random.randint(30, 180))
                 prescription = Prescription.objects.create(
-                    medication=fake.word(),
+                    medication=fake.word()[:20],
                     dosage=f"{random.randint(10, 500)}mg",
-                    frequency=random.choice(['Daily', 'Twice daily', 'As needed']),
+                    frequency=random.choice(['Daily', 'Twice daily', 'As needed'])[:20],
                     start_date=start_date,
                     end_date=end_date,
                     status=random.choice(['active', 'completed', 'cancelled']),
@@ -134,7 +137,7 @@ class Command(BaseCommand):
                 start_date = fake.date_between(start_date='-1y', end_date='today')
                 end_date = start_date + timedelta(days=random.randint(30, 180))
                 Prescription.objects.create(
-                    medication=fake.word(),
+                    medication=fake.word()[:20],
                     dosage=f"{random.randint(10, 500)}mg",
                     frequency=random.choice(['Daily', 'Twice daily', 'As needed']),
                     start_date=start_date,
@@ -142,3 +145,6 @@ class Command(BaseCommand):
                     status=random.choice(['active', 'completed', 'cancelled']),
                     duration=f"{(end_date - start_date).days} days"
                 )
+
+    
+                
