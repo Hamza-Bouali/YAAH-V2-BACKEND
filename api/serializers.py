@@ -53,9 +53,9 @@ class VisitSerializer(ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        Visit = Visit.objects.create(**validated_data)
-        Visit.save()
-        return Visit
+        visit = Visit.objects.create(**validated_data)
+        visit.save()
+        return visit
     
     def update(self, instance, validated_data: dict):
         # Update instance fields with validated_data
@@ -76,9 +76,9 @@ class AppointmentSerializer(ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        Appointment = Appointment.objects.create(**validated_data)
-        Appointment.save()
-        return Appointment
+        appointment = Appointment.objects.create(**validated_data)
+        appointment.save()
+        return appointment
     
     def update(self, instance, validated_data: dict):
         # Update instance fields with validated_data
@@ -99,9 +99,9 @@ class AllergySerializer(ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        Allergy = Allergy.objects.create(**validated_data)
-        Allergy.save()
-        return Allergy
+        allergy = Allergy.objects.create(**validated_data)
+        allergy.save()
+        return allergy
     
     def update(self, instance, validated_data: dict):
         # Update instance fields with validated_data
@@ -122,9 +122,9 @@ class DiseaseSerializer(ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        Disease = Disease.objects.create(**validated_data)
-        Disease.save()
-        return Disease
+        disease = Disease.objects.create(**validated_data)
+        disease.save()
+        return disease
     
     def update(self, instance, validated_data: dict):
         # Update instance fields with validated_data
@@ -145,9 +145,9 @@ class PrescriptionSerializer(ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        Prescription = Prescription.objects.create(**validated_data)
-        Prescription.save()
-        return Prescription
+        prescription = Prescription.objects.create(**validated_data)
+        prescription.save()
+        return prescription
     
     def update(self, instance, validated_data: dict):
         # Update instance fields with validated_data
