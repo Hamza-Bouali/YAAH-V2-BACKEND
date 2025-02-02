@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponse
 from .models import Patient , Visit , Appointment , Allergy , Disease , Prescription 
 from .serializers import PatientSerializer , VisitSerializer , AppointmentSerializer , AllergySerializer , DiseaseSerializer , PrescriptionSerializer
-
+from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny  # Allow access without authentication
 from rest_framework.views import APIView
@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserRegistrationSerializer, UserLoginSerializer
 # Create your views here.
-
+from rest_framework.renderers import JSONRenderer
 import logging
 from django.db.models.functions import TruncDate
 from django.db.models import Count
@@ -88,13 +88,69 @@ def index(request):
 
 from time import time
 from datetime import date, timedelta
-class VisitStatisticsView(APIView):
-    def get(self, request):
-        # Example query, adjust as needed
+
+
+@api_view(['GET'])
+def get_statistics(request):
+    try:
+        today = date.today()
+        
+        # Get all visits and group by date
         visits = Visit.objects.all()
-        visit_stats = Visit.objects.values('date').annotate(count=Count('id'))
-        lastweekday=date.today()-timedelta(days=7)
-        last_week_visits = Visit.objects.filter(date__gte=lastweekday.strftime('%Y-%m-%d'), date__lte=date.today().strftime('%Y-%m-%d'))
+        visit_stats = visits.annotate(visit_date=TruncDate('date')) \
+                           .values('date') \
+                           .annotate(count=Count('id')) \
+                           .order_by('date')
+
+        # Calculate last week's data 
+        # Calculate last week's start (Monday) and end (Sunday)
+        today = date.today()
+        last_week_monday = today - timedelta(days=today.weekday() + 7)
+        last_week_sunday = today - timedelta(days=today.weekday() + 1)
+        
+        # Get visits for last week
+        last_week_visits = visits.filter(date__gte=last_week_monday, date__lte=last_week_sunday)
         last_week_visits_count = last_week_visits.count()
-        last_week_visits_by_day = last_week_visits.annotate(day=TruncDate('date')).values('day').order_by('day')    
-        return Response({"visits": visits.count(), "visits_per_day": visit_stats, "last_week_visits": last_week_visits_count, "last_week_visits_by_day": last_week_visits_by_day})
+        
+        # Get visits by day for last week
+        last_week_visits_by_day = last_week_visits.annotate(
+            visit_date=TruncDate('date')
+        ).values('date').annotate(
+            count=Count('id')
+        ).order_by('date')
+
+        # Calculate this week data
+        # Calculate this week's start (Monday) and end (today)
+
+        this_week_monday = today - timedelta(days=today.weekday())
+        this_week_sunday = today + timedelta(days=6 - today.weekday())
+
+        # Get visits for this week
+        this_week_visits = visits.filter(date__gte=this_week_monday, date__lte=this_week_sunday)
+        this_week_visits_count = this_week_visits.count()
+
+        # Get visits by day for this week
+        this_week_visits_by_day = this_week_visits.annotate(
+            visit_date=TruncDate('date')
+        ).values('date').annotate(
+            count=Count('id')
+        ).order_by('date')
+
+
+
+        response = Response({
+            "visits": visits.count(),
+            "visits_per_day": visit_stats,
+            "last_week_visits": last_week_visits_count,
+            "last_week_visits_by_day": last_week_visits_by_day,
+            "this_week_visits": this_week_visits_count,
+            "this_week_visits_by_day": this_week_visits_by_day,
+        })
+        response.accepted_renderer = JSONRenderer()
+        response.accepted_media_type = "application/json"
+        response.renderer_context = {}
+        
+        return response
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)

@@ -127,6 +127,7 @@ class Patient(models.Model):
     disease= models.ManyToManyField(Disease, related_name='patient', blank=True)
     visit = models.ManyToManyField(Visit, related_name='patient', blank=True)
     appointment = models.ManyToManyField(Appointment, related_name='patient', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     medication = models.ManyToManyField(Prescription, related_name='patient', blank=True)
 
     def calculate_age(self):
