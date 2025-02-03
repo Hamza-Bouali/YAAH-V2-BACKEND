@@ -123,9 +123,9 @@ class Patient(models.Model):
     dob = models.DateField()
     blood_type = models.CharField(max_length=3, null=True, blank=True)  # e.g., A+, B-, O+
     treatment = models.TextField(blank=True)
-    allergies = models.ManyToManyField(Allergy, blank=True, related_name='patient')
     disease= models.ManyToManyField(Disease, related_name='patient', blank=True)
     visit = models.ManyToManyField(Visit, related_name='patient', blank=True)
+    allergies = models.ManyToManyField(Allergy, related_name='patient', blank=True, through=None)
     appointment = models.ManyToManyField(Appointment, related_name='patient', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     medication = models.ManyToManyField(Prescription, related_name='patient', blank=True)

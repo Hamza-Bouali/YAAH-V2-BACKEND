@@ -165,14 +165,32 @@ class PrescriptionSerializer(ModelSerializer):
 
 
 class PatientSerializer(ModelSerializer):
-    diseases = DiseaseSerializer(many=True, read_only=True)
-    allergies = AllergySerializer(many=True, read_only=True)
-    prescriptions = PrescriptionSerializer(many=True, read_only=True)
-    visits = VisitSerializer(many=True, read_only=True)
-    appointments = AppointmentSerializer(many=True, read_only=True)
+    diseases = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    allergies = serializers.PrimaryKeyRelatedField(
+        many=True, 
+        queryset=Allergy.objects.all(), 
+        read_only=False
+    )
+    prescriptions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    visits = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    appointments = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Patient
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        # Handle Many-to-Many fields properly
+        if 'allergies' in validated_data:
+            instance.allergies.set(validated_data.pop('allergies'))
+        if 'diseases' in validated_data:
+            instance.diseases.set(validated_data.pop('diseases'))
+        if 'prescriptions' in validated_data:
+            instance.prescriptions.set(validated_data.pop('prescriptions'))
+        if 'visits' in validated_data:
+            instance.visits.set(validated_data.pop('visits'))
+        if 'appointments' in validated_data:
+            instance.appointments.set(validated_data.pop('appointments'))
+
+        return super().update(instance, validated_data)
 
