@@ -101,7 +101,8 @@ class Command(BaseCommand):
                 visit = Visit.objects.create(
                     hour=fake.time(),
                     date=fake.date_between(start_date='-1y', end_date='today'),
-                    reason=random.choice(['Check-up', 'Follow-up', 'Emergency'])
+                    reason=random.choice(['Check-up', 'Follow-up', 'Emergency']),
+                    price=random.random() * 1000
                 )
                 patient.visit.add(visit)
 
@@ -147,7 +148,8 @@ class Command(BaseCommand):
                         status=random.choice(['scheduled', 'completed', 'cancelled']),
                         pat=patient,  # Use the patient instance directly,
                         place=random.choice(['Virtual', 'In-person']),
-                        notes=fake.text(max_nb_chars=200)
+                        notes=fake.text(max_nb_chars=200),
+                        price=random.random() * 1000
                     )
 
             # Create prescriptions

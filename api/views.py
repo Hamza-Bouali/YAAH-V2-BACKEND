@@ -11,8 +11,8 @@ from .serializers import UserRegistrationSerializer, UserLoginSerializer
 # Create your views here.
 from rest_framework.renderers import JSONRenderer
 import logging
-from django.db.models.functions import TruncDate
-from django.db.models import Count
+from django.db.models.functions import TruncDate, TruncMonth
+from django.db.models import Count, Sum , Case , When , Value , CharField
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +100,8 @@ def get_statistics(request):
         
         # Get all visits and group by date
         visits = Visit.objects.all()
+        last_year_same_day = today.replace(year=today.year - 1)
+        this_year_visits = visits.filter(date__range=[last_year_same_day, today])
         visit_stats = visits.annotate(visit_date=TruncDate('date')) \
                            .values('date') \
                            .annotate(count=Count('id')) \
@@ -142,11 +144,34 @@ def get_statistics(request):
         today_appointments = Appointment.objects.filter(date=today).count()
         today_app = AppointmentSerializer(Appointment.objects.filter(date=today), many=True).data
 
+        # revenuce over time:
+        revenue_per_month = this_year_visits.annotate(
+            month=TruncMonth('date')
+        ).values('month').annotate(
+            total_revenue=Sum('price')
+        ).order_by('month')
+
+        # get patients by age category
+
+        patients_by_age = Patient.objects.annotate(
+    age_category=Case(
+                When(age__lte=18, then=Value('0-18')),
+                When(age__gte=19, age__lte=35, then=Value('19-35')),
+                When(age__gte=36, age__lte=50, then=Value('36-50')),
+                When(age__gte=51, then=Value('51+')),
+                output_field=CharField(),
+            )
+        ).values('age_category').annotate(
+            count=Count('id')
+        ).order_by('age_category')
+
 
         # Appointemtents stats:
 
         response = Response({
+            'patients_by_age':patients_by_age,
             "patients_count":patients_count,
+            'revenue_per_month': revenue_per_month,
             'today_app':today_app,
             "today_appointments":today_appointments,
             "visits": visits.count(),
@@ -157,7 +182,7 @@ def get_statistics(request):
             "this_week_visits": this_week_visits_count,
             "this_week_visits_by_day": this_week_visits_by_day,
         })
-        response.accepted_renderer = JSONRenderer()
+        response.acceptmaped_renderer = JSONRenderer()
         response.accepted_media_type = "application/json"
         response.renderer_context = {}
         

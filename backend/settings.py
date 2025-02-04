@@ -80,7 +80,8 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # Use JWT for authentication
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # Allow only authenticated access
+        #'rest_framework.permissions.IsAuthenticated',  # Allow only authenticated access
+        'rest_framework.permissions.AllowAny',
     ],
 }
 
