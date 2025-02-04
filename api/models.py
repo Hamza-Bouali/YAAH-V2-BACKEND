@@ -91,6 +91,9 @@ class Appointment(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    place=models.CharField(max_length=255, blank=True,choices=[('Virtual','Virtual'),('In-person','In-person')],default='in-person')
+    pat = models.ForeignKey('Patient', on_delete=models.CASCADE, related_name='appointments')
+
 
     def clean(self):
         if self.date < date.today():

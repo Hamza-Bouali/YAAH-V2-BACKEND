@@ -71,6 +71,7 @@ class VisitSerializer(ModelSerializer):
     
 
 class AppointmentSerializer(ModelSerializer):
+
     class Meta:
         model = Appointment
         fields = '__all__'
@@ -85,11 +86,6 @@ class AppointmentSerializer(ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        return instance
-
-
-    def delete(self, instance):
-        instance.delete()
         return instance
     
 
@@ -181,6 +177,7 @@ class PatientSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         # Handle Many-to-Many fields properly
+        instance.age=instance.calculate_age()
         if 'allergies' in validated_data:
             instance.allergies.set(validated_data.pop('allergies'))
         if 'diseases' in validated_data:

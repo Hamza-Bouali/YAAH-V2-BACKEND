@@ -141,12 +141,14 @@ class Command(BaseCommand):
 
             # Create appointments
             for _ in range(random.randint(0, 2)):
-                appointment = Appointment.objects.create(
-                    date=fake.date_between(start_date='today', end_date='+6m'),
-                    time=fake.time(),
-                    status=random.choice(['scheduled', 'completed', 'cancelled', 'no_show'])
-                )
-                patient.appointment.add(appointment)
+                Appointment.objects.create(
+                        date=fake.date_between(start_date='today', end_date='+6m'),
+                        time=fake.time(),
+                        status=random.choice(['scheduled', 'completed', 'cancelled']),
+                        pat=patient,  # Use the patient instance directly,
+                        place=random.choice(['Virtual', 'In-person']),
+                        notes=fake.text(max_nb_chars=200)
+                    )
 
             # Create prescriptions
             for _ in range(random.randint(1, 3)):
