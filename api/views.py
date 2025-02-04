@@ -140,15 +140,17 @@ def get_statistics(request):
         ).order_by('date')
 
         today_appointments = Appointment.objects.filter(date=today).count()
+        today_app = AppointmentSerializer(Appointment.objects.filter(date=today), many=True).data
 
 
         # Appointemtents stats:
-        
 
         response = Response({
             "patients_count":patients_count,
+            'today_app':today_app,
             "today_appointments":today_appointments,
             "visits": visits.count(),
+            
             "visits_per_day": visit_stats,
             "last_week_visits": last_week_visits_count,
             "last_week_visits_by_day": last_week_visits_by_day,

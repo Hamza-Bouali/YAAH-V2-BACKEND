@@ -93,6 +93,7 @@ class Appointment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     place=models.CharField(max_length=255, blank=True,choices=[('Virtual','Virtual'),('In-person','In-person')],default='in-person')
     pat = models.ForeignKey('Patient', on_delete=models.CASCADE, related_name='appointments')
+    price=models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
 
     def clean(self):
@@ -145,4 +146,4 @@ class Patient(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['name']
+        ordering = ['name', 'dob']  
