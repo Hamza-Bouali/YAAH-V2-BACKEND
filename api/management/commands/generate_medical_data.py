@@ -142,15 +142,20 @@ class Command(BaseCommand):
 
             # Create appointments
             for _ in range(random.randint(0, 2)):
+                hour = random.randint(9, 17)
+                appointment_time = f"{hour:02d}:00"
+                today = date.today()
+                days_offset = int(random.gauss(30, 15))  # Mean of 30 days, std dev of 15 days
+                future_date = today + timedelta(days=max(0, min(180, days_offset)))  # Clamp between today and 6 months
                 Appointment.objects.create(
-                        date=fake.date_between(start_date='today', end_date='+6m'),
-                        time=fake.time(),
-                        status=random.choice(['scheduled', 'completed', 'cancelled']),
-                        pat=patient,  # Use the patient instance directly,
-                        place=random.choice(['Virtual', 'In-person']),
-                        notes=fake.text(max_nb_chars=200),
-                        price=random.random() * 1000
-                    )
+                    date=future_date,
+                    time=appointment_time,
+                    status=random.choice(['scheduled', 'completed', 'cancelled']),
+                    pat=patient,
+                    place=random.choice(['Virtual', 'In-person']),
+                    notes=fake.text(max_nb_chars=200),
+                    price=random.random() * 1000
+                )
 
             # Create prescriptions
             for _ in range(random.randint(1, 3)):

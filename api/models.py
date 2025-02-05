@@ -5,6 +5,13 @@ from datetime import date
 
 
 
+class Facture(models.Model):
+    id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    date=models.DateField(auto_created=True)
+    price=models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    source=models.CharField(max_length=255, blank=True)
+
+
 class Disease(models.Model):
     """Model representing a disease."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -111,11 +118,35 @@ class Appointment(models.Model):
 
 from django.contrib.auth.models import AbstractUser
 class Doctor(AbstractUser):
-    
+    """Model representing a doctor in the medical system."""
+
+    id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    first_name=models.CharField(max_length=50, blank=True,default='Doctor')
+    last_name=models.CharField(max_length=50, blank=True,default='Doctor')
+    phone_number=models.CharField(max_length=50, blank=True,default='123456789')
+    city=models.CharField(max_length=50, blank=True,default='Morocco')
+    dob=models.DateField(blank=True,default=date.today)
+    email=models.EmailField(blank=True, null=True)
+    username=models.CharField(max_length=50, blank=True,default='Doctor',unique=True)
     def __str__(self):
         return self.username + " "+ self.email
     
+    def calculate_age(self):
+        today = date.today()
+        return today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
+    def __str__(self):
+        return self.username + " " + (self.email or '')
 
+    def clean(self):
+        if self.dob > date.today():
+            raise ValidationError("Date of birth cannot be in the future")
+        
+    def save(self, *args, **kwargs):
+        self.age = self.calculate_age()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ['username']
 
 class Patient(models.Model):
     """Model representing a patient in the medical system."""
@@ -148,3 +179,25 @@ class Patient(models.Model):
 
     class Meta:
         ordering = ['name', 'dob']  
+
+class Message(models.Model):
+    id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    sender=models.ForeignKey('Patient', on_delete=models.CASCADE, related_name='messages')
+    text=models.TextField()
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return f"Message from {self.sender.name} in {self.conversation}"
+
+
+class Conversation(models.Model):
+    id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    patient=models.ForeignKey('Patient', on_delete=models.CASCADE, related_name='conversations')
+    doctor=models.ForeignKey('Doctor', on_delete=models.CASCADE, related_name='conversations')
+    created_at=models.DateTimeField(auto_now_add=True)
+    messages=models.ManyToManyField(Message, related_name='conversation', blank=True)
+    def __str__(self):
+        return f"Conversation between {self.patient.name} and {self.doctor.username}"
+    
+    class Meta:
+        ordering = ['-created_at']

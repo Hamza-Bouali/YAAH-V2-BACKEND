@@ -1,6 +1,6 @@
 from django.shortcuts import render, HttpResponse
-from .models import Patient , Visit , Appointment , Allergy , Disease , Prescription 
-from .serializers import PatientSerializer , VisitSerializer , AppointmentSerializer , AllergySerializer , DiseaseSerializer , PrescriptionSerializer
+from .models import Patient , Visit , Appointment , Allergy , Disease , Prescription , Conversation , Message
+from .serializers import PatientSerializer , VisitSerializer , AppointmentSerializer , AllergySerializer , DiseaseSerializer , PrescriptionSerializer , ConversationSerializer , MessageSerializer
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny  # Allow access without authentication
@@ -13,7 +13,8 @@ from rest_framework.renderers import JSONRenderer
 import logging
 from django.db.models.functions import TruncDate, TruncMonth
 from django.db.models import Count, Sum , Case , When , Value , CharField
-
+import uuid
+from django.contrib.auth import get_user_model
 logger = logging.getLogger(__name__)
 
 class UserRegistrationView(APIView):
@@ -28,6 +29,7 @@ class UserRegistrationView(APIView):
 
 class UserLoginView(APIView):
     permission_classes = [AllowAny]  # Override default permissions
+
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -65,8 +67,13 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 def index(request):
     return HttpResponse('Hello World')
 
+class ConversationViewSet(viewsets.ModelViewSet):
+    queryset = Conversation.objects.all()
+    serializer_class = ConversationSerializer
 
-
+class MessageViewSet(viewsets.ModelViewSet):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
 
 """class AppointmentStatisticsView(APIView):
     permission_classes = [AllowAny]  # Override default permissions
@@ -190,3 +197,27 @@ def get_statistics(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+    
+
+@api_view(['GET'])
+def create_user_UUID(request):
+    try:
+        return Response({"UUID":str(uuid.uuid4())})
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+    
+
+
+
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_data(request):
+    try:
+        user = get_user_model().objects.get(id=request.user.id)
+        return Response({"username": user.username, "email": user.first_name,"id":user.id,"phone_number":user.phone_number,"city":user.city,"dob":user.dob})
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

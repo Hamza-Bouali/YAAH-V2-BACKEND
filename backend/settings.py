@@ -88,11 +88,11 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=60),  # Access token lifetime
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=60),  # Refresh token lifetime
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': False,
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=90),  # Set the access token lifetime
+    'REFRESH_TOKEN_LIFETIME': None,  # Disable refresh token
+    'ROTATE_REFRESH_TOKENS': False,  # Disable refresh token rotation
+    'BLACKLIST_AFTER_ROTATION': False,  # Disable blacklisting after rotation
+    'UPDATE_LAST_LOGIN': False,  # Disable updating last login
 }
 
 WSGI_APPLICATION = 'backend.wsgi.application'
