@@ -165,6 +165,8 @@ class Patient(models.Model):
     appointment = models.ManyToManyField(Appointment, related_name='patient', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     medication = models.ManyToManyField(Prescription, related_name='patient', blank=True)
+    sexe=models.CharField(max_length=8, blank=True,choices=[('female','female'),('male','male')],default='male')
+
 
     def calculate_age(self):
         today = date.today()

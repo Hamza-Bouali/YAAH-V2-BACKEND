@@ -86,6 +86,7 @@ class Command(BaseCommand):
                 address=fake.address()[:100],  # Ensure the address does not exceed 100 characters
                 dob=dob,
                 blood_type=random.choice(blood_types),
+                sexe=random.choice(['male', 'female']),
                 treatment=fake.text(max_nb_chars=200),
             )
             patients.append(patient)
