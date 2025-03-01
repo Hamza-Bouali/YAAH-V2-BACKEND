@@ -3,7 +3,7 @@ from django.urls import path, include
 from .views import index,create_user_UUID
 from rest_framework.routers import DefaultRouter
 from .views import get_statistics,PatientViewSet, VisitViewSet, AppointmentViewSet, AllergyViewSet, DiseaseViewSet, PrescriptionViewSet,UserRegistrationView, UserLoginView,ConversationViewSet,MessageViewSet,get_user_data
-
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, PatientSerializer, VisitSerializer, AppointmentSerializer, AllergySerializer, DiseaseSerializer, PrescriptionSerializer,ConversationSerializer,MessageSerializer 
 
 router = DefaultRouter()
 router.register(r'patients', PatientViewSet, basename='Patients')

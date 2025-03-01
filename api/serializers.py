@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
-from .models import Patient, Visit, Appointment , Allergy, Disease,Prescription, Conversation, Message
+from .models import Doctor, Patient, Visit, Appointment , Allergy, Disease,Prescription, Conversation, Message
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -17,12 +17,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     phone_number=serializers.CharField(write_only=True)
     city=serializers.CharField(write_only=True)
     dob=serializers.DateField(write_only=True,input_formats=['%d/%m/%Y'])
-    assurance_number=serializers.CharField(write_only=True)
-    inassurance=serializers.CharField(write_only=True)
+    
     
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'first_name', 'last_name', 'phone_number', 'city', 'dob', 'assurance_number', 'inassurance']
+        fields = ['username', 'email', 'password', 'first_name', 'last_name', 'phone_number', 'city', 'dob']
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -33,8 +32,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             phone_number=validated_data['phone_number'],
             city=validated_data['city'],
             dob=validated_data['dob'],
-            assurance_number=validated_data['assurance_number'],
-            inassurance=validated_data['inassurance'],
+            
             password=validated_data['password']
         )
         return user
@@ -243,6 +241,35 @@ class ConversationSerializer(ModelSerializer):
     
     def update(self, instance, validated_data: dict):
         # Update instance fields with validated_data
+        messages = validated_data.pop('messages', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        if messages is not None:
+            instance.messages.set(messages)
+        
+        return instance
+
+
+    def delete(self, instance):
+        instance.delete()
+        return instance
+    
+
+
+class DoctorSerializer(ModelSerializer):
+    class Meta:
+        model = Doctor
+        fields = '__all__'
+
+    def create(self, validated_data):
+        doctor = Doctor.objects.create(**validated_data)
+        doctor.save()
+        return doctor
+    
+    def update(self, instance, validated_data: dict):
+        # Update instance fields with validated_data
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -252,4 +279,3 @@ class ConversationSerializer(ModelSerializer):
     def delete(self, instance):
         instance.delete()
         return instance
-    

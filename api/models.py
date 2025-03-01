@@ -121,8 +121,8 @@ class Doctor(AbstractUser):
     """Model representing a doctor in the medical system."""
 
     id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    first_name=models.CharField(max_length=50, blank=True,default='Doctor')
-    last_name=models.CharField(max_length=50, blank=True,default='Doctor')
+    first_name=models.CharField(max_length=50, blank=True,default='Doctor',null=True)
+    last_name=models.CharField(max_length=50, blank=True,default='Doctor',null=True)
     phone_number=models.CharField(max_length=50, blank=True,default='123456789')
     city=models.CharField(max_length=50, blank=True,default='Morocco')
     dob=models.DateField(blank=True,default=date.today)
@@ -167,7 +167,6 @@ class Patient(models.Model):
     medication = models.ManyToManyField(Prescription, related_name='patient', blank=True)
     sexe=models.CharField(max_length=8, blank=True,choices=[('female','female'),('male','male')],default='male')
 
-
     def calculate_age(self):
         today = date.today()
         return today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
@@ -185,12 +184,12 @@ class Patient(models.Model):
 class Message(models.Model):
     id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sender=models.ForeignKey('Patient', on_delete=models.CASCADE, related_name='messages')
+    sent_by=models.CharField(max_length=255, blank=True)
     text=models.TextField()
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"Message from {self.sender.name} in {self.conversation}"
-
 
 class Conversation(models.Model):
     id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

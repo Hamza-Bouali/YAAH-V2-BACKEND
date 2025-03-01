@@ -5,7 +5,7 @@ from django.db import transaction
 from faker import Faker
 import random
 from datetime import timedelta, date
-from api.models import Patient, Disease, Allergy, Prescription, Visit, Appointment
+from api.models import Patient, Disease, Allergy, Prescription, Visit, Appointment,Message,Conversation,Doctor
 
 fake = Faker()
 
@@ -171,6 +171,25 @@ class Command(BaseCommand):
                     status=random.choice(['active', 'completed', 'cancelled']),
                     duration=f"{(end_date - start_date).days} days"
                 )
+            
+            # create conversation with patient
+            doctor = Doctor.objects.first()
+            if not doctor:
+                 # Create a default doctor if none exists
+                doctor = Doctor.objects.create(username='default_doctor')
+
+            # Assign doctor to the conversation
+            conversation = Conversation.objects.create(doctor=doctor, patient=patient)
+
+            # Assign patient to the conversation
+            
+            for _ in range(random.randint(1, 5)):
+                message = Message.objects.create(
+                    sender=patient,
+                    sent_by=random.choice(['doctor', 'patient']),
+                    text=fake.text(max_nb_chars=200)
+                )
+                conversation.messages.add(message)
 
     
                 

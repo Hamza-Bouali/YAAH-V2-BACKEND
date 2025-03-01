@@ -2,6 +2,8 @@ from django.shortcuts import render, HttpResponse
 from .models import Patient , Visit , Appointment , Allergy , Disease , Prescription , Conversation , Message
 from .serializers import PatientSerializer , VisitSerializer , AppointmentSerializer , AllergySerializer , DiseaseSerializer , PrescriptionSerializer , ConversationSerializer , MessageSerializer
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny  # Allow access without authentication
 from rest_framework.views import APIView
@@ -71,9 +73,26 @@ class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
 
+    @action(detail=True, methods=['get','post','delete','put'])
+    def q(self, request):
+        conversation_id = request.query_params.get('id', None)
+        if conversation_id is not None:
+            try:
+                conversation = Conversation.objects.get(id=conversation_id)
+                serializer = self.get_serializer(conversation)
+                return Response(serializer.data)
+            except Conversation.DoesNotExist:
+                return Response({"error": "Conversation not found"}, status=404)
+        return Response({"error": "ID parameter is required"}, status=400)
+
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        message_id = response.data.get('id')
+        return Response({'message_id': message_id}, status=response.status_code)
 
 """class AppointmentStatisticsView(APIView):
     permission_classes = [AllowAny]  # Override default permissions
@@ -212,12 +231,27 @@ def create_user_UUID(request):
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth.decorators import login_required
+
+
+from .models import Doctor
+from .serializers import DoctorSerializer
+from rest_framework_simplejwt.tokens import AccessToken
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@login_required
 def get_user_data(request):
     try:
-        user = get_user_model().objects.get(id=request.user.id)
-        return Response({"username": user.username, "email": user.first_name,"id":user.id,"phone_number":user.phone_number,"city":user.city,"dob":user.dob})
+        user_tooken = request.headers.get('Authorization').split(' ')[1]
+        user_id=AccessToken(user_tooken).payload['user_id']
+        user = get_user_model().objects.get(id=user_id)
+        if user.is_authenticated:
+            
+                doctor = user
+                serializer = DoctorSerializer(doctor)
+                return Response(serializer.data)
+            
+        else:
+            return Response({"error": "User is not authenticated"}, status=400)
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"error": str(e)}, status=500)
