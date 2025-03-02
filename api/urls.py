@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from .views import index,create_user_UUID
 from rest_framework.routers import DefaultRouter
-from .views import get_statistics,PatientViewSet, VisitViewSet, AppointmentViewSet, AllergyViewSet, DiseaseViewSet, PrescriptionViewSet,UserRegistrationView, UserLoginView,ConversationViewSet,MessageViewSet,get_user_data
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, PatientSerializer, VisitSerializer, AppointmentSerializer, AllergySerializer, DiseaseSerializer, PrescriptionSerializer,ConversationSerializer,MessageSerializer 
+from .views import get_statistics,PatientViewSet, VisitViewSet, AppointmentViewSet, AllergyViewSet, DiseaseViewSet, PrescriptionViewSet,UserRegistrationView, UserLoginView,ConversationViewSet,MessageViewSet,get_user_data,NotificationViewSet
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, PatientSerializer, VisitSerializer, AppointmentSerializer, AllergySerializer, DiseaseSerializer, PrescriptionSerializer,ConversationSerializer,MessageSerializer , NotificationSerializer
 
 router = DefaultRouter()
 router.register(r'patients', PatientViewSet, basename='Patients')
@@ -14,7 +14,7 @@ router.register(r'diseases', DiseaseViewSet, basename='Diseases')
 router.register(r'prescriptions', PrescriptionViewSet, basename='Prescriptions')
 router.register(r'conversations', ConversationViewSet, basename='Conversations')
 router.register(r'messages', MessageViewSet, basename='Messages')
-
+router.register(r'notifications', NotificationViewSet, basename='Notifications')
 
 
 

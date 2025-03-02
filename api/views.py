@@ -1,6 +1,6 @@
 from django.shortcuts import render, HttpResponse
-from .models import Patient , Visit , Appointment , Allergy , Disease , Prescription , Conversation , Message
-from .serializers import PatientSerializer , VisitSerializer , AppointmentSerializer , AllergySerializer , DiseaseSerializer , PrescriptionSerializer , ConversationSerializer , MessageSerializer
+from .models import Patient , Visit , Appointment , Allergy , Disease , Prescription , Conversation , Message, Notification
+from .serializers import PatientSerializer , VisitSerializer , AppointmentSerializer , AllergySerializer , DiseaseSerializer , PrescriptionSerializer , ConversationSerializer , MessageSerializer, NotificationSerializer
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
@@ -18,6 +18,28 @@ from django.db.models import Count, Sum , Case , When , Value , CharField
 import uuid
 from django.contrib.auth import get_user_model
 logger = logging.getLogger(__name__)
+
+
+
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        notification_id = response.data.get('id')
+        return Response({'notification_id': notification_id}, status=response.status_code)
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        notification_id = response.data.get('id')
+        return Response({'notification_id': notification_id}, status=response.status_code)
+
+    def delete(self, request, *args, **kwargs):
+        response = super().delete(request, *args, **kwargs)
+        notification_id = response.data.get('id')
+        return Response({'notification_id': notification_id}, status=response.status_code)
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]  # Override default permissions

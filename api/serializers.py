@@ -1,12 +1,35 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
-from .models import Doctor, Patient, Visit, Appointment , Allergy, Disease,Prescription, Conversation, Message
+from .models import Doctor, Patient, Visit, Appointment , Allergy, Disease,Prescription, Conversation, Message,Notification
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken
 
 
 User = get_user_model()
+
+class NotificationSerializer(ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'
+
+    def create(self, validated_data):
+        notification = Notification.objects.create(**validated_data)
+        notification.save()
+        return notification
+    
+    def update(self, instance, validated_data: dict):
+        # Update instance fields with validated_data
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+    def delete(self, instance):
+        instance.delete()
+        return instance
+
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     

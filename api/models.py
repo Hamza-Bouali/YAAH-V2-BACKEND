@@ -202,3 +202,17 @@ class Conversation(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+
+
+class Notification(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    type = models.CharField(max_length=50)
+    title = models.CharField(max_length=100)
+    subtitle = models.CharField(max_length=200)
+    is_seen = models.BooleanField(default=False)
+    doctor = models.ForeignKey('Doctor', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title
+    
