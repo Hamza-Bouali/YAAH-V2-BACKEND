@@ -194,12 +194,15 @@ class Command(BaseCommand):
             # Assign patient to the conversation
             
             for _ in range(random.randint(1, 5)):
+                sent_by = random.choice(['doctor', 'patient'])
+                sender = patient
                 message = Message.objects.create(
-                    sender=patient,
-                    sent_by=random.choice(['doctor', 'patient']),
+                    sender=sender,
+                    sent_by=sent_by,
                     text=fake.text(max_nb_chars=200)
                 )
                 conversation.messages.add(message)
+                print(f"Created message: {message.text}, sent_by: {sent_by}, sender: {sender}")
 
     
                 

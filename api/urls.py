@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from .views import index,create_user_UUID
 from rest_framework.routers import DefaultRouter
-from .views import get_statistics,PatientViewSet, VisitViewSet, AppointmentViewSet, AllergyViewSet, DiseaseViewSet, PrescriptionViewSet,UserRegistrationView, UserLoginView,ConversationViewSet,MessageViewSet,get_user_data,NotificationViewSet
+from .views import get_statistics,PatientViewSet, VisitViewSet, AppointmentViewSet, AllergyViewSet, DiseaseViewSet, PrescriptionViewSet,UserRegistrationView, UserLoginView,ConversationViewSet,MessageViewSet,get_user_data,NotificationViewSet,get_power_bi_embed_config
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, PatientSerializer, VisitSerializer, AppointmentSerializer, AllergySerializer, DiseaseSerializer, PrescriptionSerializer,ConversationSerializer,MessageSerializer , NotificationSerializer
 
 router = DefaultRouter()
@@ -25,6 +25,7 @@ urlpatterns = [
     path('statistics/', view=get_statistics, name='statistics'),
     path('user_id/', view=create_user_UUID, name='create_user_UUID'),
     path('get_user_data/', view=get_user_data, name='get_user_data'),
+    path('api/powerbi/', get_power_bi_embed_config, name='powerbi_token'),
     
     *router.urls,
 ]

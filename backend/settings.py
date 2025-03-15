@@ -101,19 +101,29 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+import environ
+env = environ.Env()
+environ.Env.read_env()
 
 
+# ...existing code...
+
+import dj_database_url
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'yaah',       # Database name
-        'USER': 'postgres',           # Database user
-        'PASSWORD': 'admin12345',  # Database password
-        'HOST': 'yaah.c3ouuseeuf7p.eu-north-1.rds.amazonaws.com',        # Database host (use 'localhost' for local development)
-        'PORT': '5432',            # Default PostgreSQL port
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+
+
+POWER_BI_CLIENT_ID = "9f48b230-ed3e-451d-8c76-6e0c2fd52d3b"
+POWER_BI_CLIENT_SECRET = "757f243b-116e-47d2-9306-3dfe9dff0fb8"
+POWER_BI_TENANT_ID = "0b578d97-bb35-4c75-863a-9280b97ff86e"
+POWER_BI_WORKSPACE_ID = "YOUR_WORKSPACE_ID"
+POWER_BI_DASHBOARD_ID = "YOUR_DASHBOARD_ID"
 
 
 # Password validation
@@ -161,6 +171,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

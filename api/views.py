@@ -107,13 +107,39 @@ class ConversationViewSet(viewsets.ModelViewSet):
                 return Response({"error": "Conversation not found"}, status=404)
         return Response({"error": "ID parameter is required"}, status=400)
 
+    @action(detail=True, methods=['post'])
+    def create_message(self, request, pk=None):
+        try:
+            conversation = self.get_object()
+            data = request.data
+            data['conversation'] = conversation.id
+            
+            # Validate sender field
+            sender_id = data.get('sender')
+            if not sender_id:
+                return Response({"error": "Sender field is required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Check if sender exists
+            try:
+                sender = get_user_model().objects.get(id=sender_id)
+            except get_user_model().DoesNotExist:
+                return Response({"error": "Invalid sender ID"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            serializer = MessageSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        message_id = response.data.get('id')
+        message_id=response.data.get('id')
         return Response({'message_id': message_id}, status=response.status_code)
 
 """class AppointmentStatisticsView(APIView):
@@ -277,3 +303,31 @@ def get_user_data(request):
             return Response({"error": "User is not authenticated"}, status=400)
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+    
+
+from django.http import JsonResponse
+from django.conf import settings
+import requests
+
+def get_power_bi_token():
+    url = f"https://login.microsoftonline.com/{settings.POWER_BI_TENANT_ID}/oauth2/v2.0/token"
+    data = {
+        "grant_type": "client_credentials",
+        "client_id": settings.POWER_BI_CLIENT_ID,
+        "client_secret": settings.POWER_BI_CLIENT_SECRET,
+        "scope": "https://graph.microsoft.com/.default",
+    }
+    response = requests.post(url, data=data)
+    return response.json()
+
+def get_power_bi_embed_config(request):
+    token_data = get_power_bi_token()
+    if "access_token" not in token_data:
+        return JsonResponse({"error": "Failed to get token"}, status=500)
+
+    embed_url = f"https://app.powerbi.com/dashboardEmbed?dashboardId={settings.POWER_BI_DASHBOARD_ID}"
+
+    return JsonResponse({
+        "access_token": token_data["access_token"],
+        "embed_url": embed_url
+    })
