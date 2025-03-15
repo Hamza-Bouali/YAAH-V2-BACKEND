@@ -5,7 +5,7 @@ from django.db import transaction
 from faker import Faker
 import random
 from datetime import timedelta, date
-from api.models import Patient, Disease, Allergy, Prescription, Visit, Appointment,Message,Conversation,Doctor,Notification
+from api.models import Patient, Disease, Allergy, Prescription, Visit, Appointment,Message,Conversation,Doctor,Notification,Depense,Revenue
 
 fake = Faker()
 
@@ -35,6 +35,9 @@ class Command(BaseCommand):
             Prescription.objects.all().delete()
             Visit.objects.all().delete()
             Appointment.objects.all().delete()
+            Message.objects.all().delete()
+            Conversation.objects.all().delete()
+            Notification.objects.all().delete()
 
         num_patients = options['patients']
 
@@ -50,7 +53,37 @@ class Command(BaseCommand):
         self.stdout.write('Creating related data...')
         self.create_patient_data(patients, diseases, allergies)
 
+        self.stdout.write('Creating depenses...')
+        self.create_depenses()
+
+        self.stdout.write('Creating revenues...')
+        self.create_revenues()
+
         self.stdout.write(self.style.SUCCESS('Successfully generated medical data'))
+
+    def create_depenses(self):
+        directions = ['immobilier', 'publicite', 'fourniture consommable', 'capital humain', "rembouresement d'empreint"]
+        doctors = Doctor.objects.all()
+        for _ in range(random.randint(0,20)):  # Adjust the number of depenses as needed
+            Depense.objects.create(
+                date=fake.date_between(start_date='-1y', end_date='today'),
+                price=round(random.uniform(100, 10000), 2),
+                direction=random.choice(directions),
+                doctor=random.choice(doctors),
+                type=random.choice(directions)
+            )
+
+    def create_revenues(self):
+        sources = ['consultation', 'prescription', 'analyse', 'pret bancaire']
+        doctors = Doctor.objects.all()
+        for _ in range(random.randint(0,50)):  # Adjust the number of revenues as needed
+            Revenue.objects.create(
+                date=fake.date_between(start_date='-1y', end_date='today'),
+                price=round(random.uniform(100, 10000), 2),
+                source=fake.word(),
+                type=random.choice(sources),
+                doctor=random.choice(doctors)
+            )
 
     def create_diseases(self):
         diseases_data = [
@@ -202,7 +235,7 @@ class Command(BaseCommand):
                     text=fake.text(max_nb_chars=200)
                 )
                 conversation.messages.add(message)
-                print(f"Created message: {message.text}, sent_by: {sent_by}, sender: {sender}")
+                
 
     
                 

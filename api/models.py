@@ -224,9 +224,10 @@ class Revenue(models.Model):
     price=models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     source=models.CharField(max_length=255, blank=True)
     type=models.CharField(max_length=255, blank=True,choices=[('consultation','consultation'),('prescription','prescription'),('analyse','analyse'),('pret bancaire','pret bancaire')],default='consultation')
+    doctor=models.ForeignKey('Doctor', on_delete=models.CASCADE, related_name='revenues')
 
     def __str__(self):
-        return self.source
+        return f"{self.date.strftime('%Y-%m-%d')} - {self.source} - {self.price}"
     
 
 class Depense(models.Model):
@@ -234,8 +235,8 @@ class Depense(models.Model):
     date=models.DateField(auto_created=True)
     price=models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     direction=models.CharField(max_length=255, blank=True)
+    doctor=models.ForeignKey('Doctor', on_delete=models.CASCADE, related_name='depenses')
     type=models.CharField(max_length=255, blank=True,choices=[(i,i) for i in ['immobilier','publicite','fourniture consommable','capital humain',"rembouresement d'empreint"]],default='immobilier')
 
     def __str__(self):
-        return self.direction + " " + self.date
-    
+        return f"{self.date.strftime('%Y-%m-%d')} - {self.direction} - {self.price}"
