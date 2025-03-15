@@ -1,6 +1,6 @@
 from django.shortcuts import render, HttpResponse
-from .models import Patient , Visit , Appointment , Allergy , Disease , Prescription , Conversation , Message, Notification
-from .serializers import PatientSerializer , VisitSerializer , AppointmentSerializer , AllergySerializer , DiseaseSerializer , PrescriptionSerializer , ConversationSerializer , MessageSerializer, NotificationSerializer
+from .models import Patient , Visit , Appointment , Allergy , Disease , Prescription , Conversation , Message, Notification, Depense, Revenue
+from .serializers import PatientSerializer , VisitSerializer , AppointmentSerializer , AllergySerializer , DiseaseSerializer , PrescriptionSerializer , ConversationSerializer , MessageSerializer, NotificationSerializer,DepenseSerializer,RevenueSerializer
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
@@ -16,7 +16,9 @@ import logging
 from django.db.models.functions import TruncDate, TruncMonth
 from django.db.models import Count, Sum , Case , When , Value , CharField
 import uuid
+
 from django.contrib.auth import get_user_model
+from django.views.decorators.csrf import csrf_exempt
 logger = logging.getLogger(__name__)
 
 
@@ -43,6 +45,8 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]  # Override default permissions
+
+    @csrf_exempt
     def post(self, request):
         logger.info(f"Login request received: {request.data}")
         serializer = UserRegistrationSerializer(data=request.data)
@@ -54,6 +58,7 @@ class UserRegistrationView(APIView):
 class UserLoginView(APIView):
     permission_classes = [AllowAny]  # Override default permissions
 
+    @csrf_exempt
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -331,3 +336,12 @@ def get_power_bi_embed_config(request):
         "access_token": token_data["access_token"],
         "embed_url": embed_url
     })
+
+
+class DepenseViewSet(viewsets.ModelViewSet):
+    queryset = Depense.objects.all()
+    serializer_class = DepenseSerializer
+
+class RevenueViewSet(viewsets.ModelViewSet):
+    queryset = Revenue.objects.all()
+    serializer_class = RevenueSerializer

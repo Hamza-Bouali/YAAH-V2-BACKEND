@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
-from .models import Doctor, Patient, Visit, Appointment , Allergy, Disease,Prescription, Conversation, Message,Notification
+from .models import Doctor, Patient, Visit, Appointment , Allergy, Disease,Prescription, Conversation, Message,Notification,Depense,Revenue
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -290,6 +290,52 @@ class DoctorSerializer(ModelSerializer):
         doctor = Doctor.objects.create(**validated_data)
         doctor.save()
         return doctor
+    
+    def update(self, instance, validated_data: dict):
+        # Update instance fields with validated_data
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+    def delete(self, instance):
+        instance.delete()
+        return instance
+    
+
+class RevenueSerializer(ModelSerializer):
+    class Meta:
+        model = Revenue
+        fields = '__all__'
+
+    def create(self, validated_data):
+        revenue = Revenue.objects.create(**validated_data)
+        revenue.save()
+        return revenue
+    
+    def update(self, instance, validated_data: dict):
+        # Update instance fields with validated_data
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+    def delete(self, instance):
+        instance.delete()
+        return instance
+    
+
+class DepenseSerializer(ModelSerializer):
+    class Meta:
+        model = Depense
+        fields = '__all__'
+
+    def create(self, validated_data):
+        depense = Depense.objects.create(**validated_data)
+        depense.save()
+        return depense
     
     def update(self, instance, validated_data: dict):
         # Update instance fields with validated_data
