@@ -112,13 +112,8 @@ import dj_database_url
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'medivo',        # Database name
-        'USER': 'root',            # Your PostgreSQL username
-        'PASSWORD': 'V8wBEHXTtmx1kH6kAIbDMd9WeQmJ6smL',    # Your PostgreSQL password
-        'HOST': 'dpg-cvaq43an91rc7399cpk0-a.oregon-postgres.render.com',         # Change to your database host (e.g., an IP or domain)
-        'PORT': '5432',              # Default PostgreSQL port
-    }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',}
 }
 
 
