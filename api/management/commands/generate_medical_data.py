@@ -1,11 +1,9 @@
-# your_app/management/commands/generate_medical_data.py
-
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from faker import Faker
 import random
 from datetime import timedelta, date
-from api.models import Patient, Disease, Allergy, Prescription, Visit, Appointment,Message,Conversation,Doctor,Notification,Depense,Revenue
+from api.models import Patient, Disease, Allergy, Prescription, Visit, Appointment, Message, Conversation, Doctor, Notification, Depense, Revenue
 
 fake = Faker()
 
@@ -18,7 +16,7 @@ class Command(BaseCommand):
             type=int,
             default=50,
             help='Number of patients to create'
-        )   
+        )
         parser.add_argument(
             '--clear',
             action='store_true',
@@ -64,7 +62,7 @@ class Command(BaseCommand):
     def create_depenses(self):
         directions = ['immobilier', 'publicite', 'fourniture consommable', 'capital humain', "rembouresement d'empreint"]
         doctors = Doctor.objects.all()
-        for _ in range(random.randint(0,20)):  # Adjust the number of depenses as needed
+        for _ in range(random.randint(0, 20)):  # Adjust the number of depenses as needed
             Depense.objects.create(
                 date=fake.date_between(start_date='-1y', end_date='today'),
                 price=round(random.uniform(100, 10000), 2),
@@ -76,7 +74,7 @@ class Command(BaseCommand):
     def create_revenues(self):
         sources = ['consultation', 'prescription', 'analyse', 'pret bancaire']
         doctors = Doctor.objects.all()
-        for _ in range(random.randint(0,50)):  # Adjust the number of revenues as needed
+        for _ in range(random.randint(0, 50)):  # Adjust the number of revenues as needed
             Revenue.objects.create(
                 date=fake.date_between(start_date='-1y', end_date='today'),
                 price=round(random.uniform(100, 10000), 2),
@@ -128,8 +126,8 @@ class Command(BaseCommand):
     def create_patient_data(self, patients, diseases, allergies):
         for patient in patients:
             # Assign diseases and allergies
-            #patient.disease.add(*random.sample(diseases, random.randint(0, len(diseases))))
-            #patient.allergies.set([allergy.id for allergy in random.sample(allergies, random.randint(0, len(allergies)))])
+            # patient.disease.add(*random.sample(diseases, random.randint(0, len(diseases))))
+            # patient.allergies.set([allergy.id for allergy in random.sample(allergies, random.randint(0, len(allergies)))])
             # Create visits
             for _ in range(random.randint(1, 5)):
                 visit = Visit.objects.create(
@@ -140,9 +138,9 @@ class Command(BaseCommand):
                 )
                 patient.visit.add(visit)
 
-            #create diseases 
+            # create diseases
             for _ in range(random.randint(1, 3)):
-                disease=Disease.objects.create(
+                disease = Disease.objects.create(
                     name=fake.word()[:20],
                     description=fake.text(max_nb_chars=200)
                 )
@@ -150,13 +148,11 @@ class Command(BaseCommand):
 
             # Create allergies
             for _ in range(random.randint(1, 3)):
-                allergy=Allergy.objects.create(
+                allergy = Allergy.objects.create(
                     name=fake.word()[:20],
                     description=fake.text(max_nb_chars=200)
                 )
                 patient.allergies.add(allergy)
-
-
 
             # Create prescriptions with correct fields
             for _ in range(random.randint(1, 3)):
@@ -172,7 +168,6 @@ class Command(BaseCommand):
                     duration=f"{random.randint(1, 6)} months"
                 )
                 patient.medication.add(prescription)
-
 
             # Create appointments
             for _ in range(random.randint(0, 2)):
@@ -204,11 +199,11 @@ class Command(BaseCommand):
                     status=random.choice(['active', 'completed', 'cancelled']),
                     duration=f"{(end_date - start_date).days} days"
                 )
-            
+
             # create conversation with patient
             doctor = Doctor.objects.first()
             if not doctor:
-                 # Create a default doctor if none exists
+                # Create a default doctor if none exists
                 doctor = Doctor.objects.create(username='default_doctor')
 
             for i in range(10):
@@ -220,12 +215,10 @@ class Command(BaseCommand):
                     doctor=doctor,
                 )
 
-
             # Assign doctor to the conversation
             conversation = Conversation.objects.create(doctor=doctor, patient=patient)
 
             # Assign patient to the conversation
-            
             for _ in range(random.randint(1, 5)):
                 sent_by = random.choice(['doctor', 'patient'])
                 sender = patient
@@ -235,7 +228,3 @@ class Command(BaseCommand):
                     text=fake.text(max_nb_chars=200)
                 )
                 conversation.messages.add(message)
-                
-
-    
-                

@@ -338,10 +338,23 @@ def get_power_bi_embed_config(request):
     })
 
 
+
 class DepenseViewSet(viewsets.ModelViewSet):
     queryset = Depense.objects.all()
     serializer_class = DepenseSerializer
 
+    def get_queryset(self):
+        user_token = self.request.headers.get('Authorization').split(' ')[1]
+        user_id = AccessToken(user_token).payload['user_id']
+        user = get_user_model().objects.get(id=user_id)
+        return Depense.objects.filter(doctor=user.id)
+
 class RevenueViewSet(viewsets.ModelViewSet):
     queryset = Revenue.objects.all()
     serializer_class = RevenueSerializer
+
+    def get_queryset(self):
+        user_token = self.request.headers.get('Authorization').split(' ')[1]
+        user_id = AccessToken(user_token).payload['user_id']
+        user = get_user_model().objects.get(id=user_id)
+        return Revenue.objects.filter(doctor=user.id)
