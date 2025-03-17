@@ -28,6 +28,12 @@ class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
 
+    def get_queryset(self):
+        user_token = self.request.headers.get('Authorization').split(' ')[1]
+        user_id = AccessToken(user_token).payload['user_id']
+        user = get_user_model().objects.get(id=user_id)
+        return Notification.objects.filter(doctor=user.id)
+
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         notification_id = response.data.get('id')
@@ -38,10 +44,9 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification_id = response.data.get('id')
         return Response({'notification_id': notification_id}, status=response.status_code)
 
-    def delete(self, request, *args, **kwargs):
-        response = super().delete(request, *args, **kwargs)
-        notification_id = response.data.get('id')
-        return Response({'notification_id': notification_id}, status=response.status_code)
+    def destroy(self, request, *args, **kwargs):
+        response = super().destroy(request, *args, **kwargs)
+        return Response(status=response.status_code)
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]  # Override default permissions
