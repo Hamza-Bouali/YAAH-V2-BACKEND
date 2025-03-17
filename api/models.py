@@ -126,6 +126,7 @@ class Doctor(AbstractUser):
     phone_number=models.CharField(max_length=50, blank=True,default='123456789')
     city=models.CharField(max_length=50, blank=True,default='Morocco')
     dob=models.DateField(blank=True,default=date.today)
+    Specialty=models.CharField(max_length=50, blank=True,default='Generalist')
     email=models.EmailField(blank=True, null=True)
     username=models.CharField(max_length=50, blank=True,default='Doctor',unique=True)
     def __str__(self):
